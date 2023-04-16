@@ -3,7 +3,7 @@ import {
   getRelationships,
   addRelationships,
   deleteRelationships,
-} from "../controllers/likes.js";
+} from "../controllers/relationship.js";
 const router = express.Router();
 router.get("/", getRelationships);
 router.post("/", addRelationships);

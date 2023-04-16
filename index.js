@@ -3,6 +3,7 @@ const app = express();
 import UserRouter from "./routes/users.js";
 import PostRouter from "./routes/posts.js";
 import LikeRouter from "./routes/likes.js";
+import RelationshipRouter from "./routes/relationships.js";
 import CommentRouter from "./routes/comments.js";
 import AuthRouter from "./routes/auth.js";
 import cors from "cors";
@@ -35,6 +36,7 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
 
 app.use("/api/users", UserRouter);
 app.use("/api/posts", PostRouter);
+app.use("/api/relationships", RelationshipRouter);
 app.use("/api/likes", LikeRouter);
 app.use("/api/auth", AuthRouter);
 app.use("/api/comments", CommentRouter);

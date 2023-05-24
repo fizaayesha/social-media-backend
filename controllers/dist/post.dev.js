@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.addPosts = exports.getPosts = void 0;
+exports.deletePosts = exports.addPosts = exports.getPosts = void 0;
 
 var _connect = require("../connect.js");
 
@@ -26,7 +26,7 @@ var getPosts = function getPosts(req, res) {
       return res.status(403).json("Token is invliad!");
     }
 
-    var q = userId ? "SELECT p.*, u.id as userId, name, profilePic FROM \n    posts AS p Join users AS u ON (u.id=p.userId) WHERE p.userId=?" : "SELECT p.*, u.id as userId, name, profilePic FROM posts AS p Join users AS u ON (u.id=p.userId)\n    LEFT JOIN relationship AS r ON (p.userId=r.followedUserId) \n  WHERE r.followerUserId=? OR p.userId=? ORDER BY p.createdAt DESC\n  ";
+    var q = userId ? "SELECT p.*, u.id as userId, name, profilePic FROM \n    posts AS p Join users AS u ON (u.id=p.userId) WHERE p.userId=?" : "SELECT p.*, u.id as userId, name, profilePic FROM posts AS p\n       Join users AS u ON (u.id=p.userId)\n    LEFT JOIN relationship AS r ON (p.userId=r.followedUserId) \n  WHERE r.followerUserId=? OR p.userId=? ORDER BY p.createdAt DESC\n  ";
     var values = userId ? [userId] : [userInfo.id, userInfo.id];
 
     _connect.db.query(q, values, function (err, data) {
@@ -61,3 +61,31 @@ var addPosts = function addPosts(req, res) {
 };
 
 exports.addPosts = addPosts;
+
+var deletePosts = function deletePosts(req, res) {
+  var token = req.cookies.accessToken;
+
+  if (!token) {
+    return res.status(401).json("Not logged in!");
+  }
+
+  _jsonwebtoken["default"].verify(token, "secretkey", function (err, userInfo) {
+    if (err) {
+      return res.status(403).json("Token is invliad!");
+    }
+
+    var q = "DELETE INTO posts WHERE `id`=? AND `userId`=?";
+
+    _connect.db.query(q, [req.params.id, userInfo.id], function (err, data) {
+      if (err) return res.status(500).json(err);
+
+      if (data.affectedRow > 0) {
+        return res.status(200).json("Post has beed deleted");
+      }
+
+      return res.status(403).json("You can delete only your post");
+    });
+  });
+};
+
+exports.deletePosts = deletePosts;
